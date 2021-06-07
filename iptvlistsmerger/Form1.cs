@@ -134,8 +134,16 @@ namespace iptvlistsmerger
                 }
             }
 
-            //first add groups by selected list
+            // first add groups by selected list
+            // check if exists file sortg.txt and add list of groups from there
             HashSet<string> groups = new HashSet<string>();
+            if (File.Exists("sortg.txt"))
+            {
+                foreach (var line in File.ReadAllLines("add1.txt"))
+                {
+                    groups.Add(line);
+                }
+            }
             foreach (var group in groups)
             {
                 if (TargetListContent.ContainsKey(group))
