@@ -125,23 +125,17 @@ namespace iptvlistsmerger
             StringBuilder targetm3uContent = new StringBuilder();
             targetm3uContent.AppendLine(TargetM3UInfo);
 
-            // add warning about not all working
-            targetm3uContent.AppendLine("#EXTINF:-1 group-title=\"Внимание\",Некоторые не работают!");
-            targetm3uContent.AppendLine("https://warn.warn/Вгимание.m3u8");
+            // check if exists file add1.txt and add lines from there right adter m3u info
+            if (File.Exists("add1.txt"))
+            {
+                foreach(var line in File.ReadAllLines("add1.txt"))
+                {
+                    targetm3uContent.AppendLine(line);
+                }
+            }
 
             //first add groups by selected list
-            HashSet<string> groups = new HashSet<string>
-            {
-                "Внимание",
-                "Федеральные",
-                "Российские",
-                "Россия",
-                "Юмор",
-                "Кино",
-                "Спорт",
-                "Познавательные",
-                "HD"
-            };
+            HashSet<string> groups = new HashSet<string>();
             foreach (var group in groups)
             {
                 if (TargetListContent.ContainsKey(group))
@@ -164,19 +158,7 @@ namespace iptvlistsmerger
             Array.Sort(groupslist);
 
             //skip list to skip grops
-            HashSet<string> skipgroupslist = new HashSet<string>
-            {
-                "Голландия",
-                "Израиль",
-                "Казахстан",
-                "Армения",
-                "Азербайджан",
-                "Молдова",
-                "Киргизия",
-                "Украина",
-                "Белорусcия",
-                "Беларусь"
-            };
+            HashSet<string> skipgroupslist = new HashSet<string>();
 
             //add rest of groups records by sorted list
             foreach (var group in groupslist)
