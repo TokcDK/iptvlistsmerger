@@ -255,7 +255,11 @@ namespace iptvlistsmerger
                         {
                             GotExm3u = true;
 
-                            var endname = line.IndexOf(' ');
+                            var endname = line.TrimEnd().IndexOf(' ');
+                            if (endname == -1) // skip when no m3u info
+                            {
+                                continue;
+                            }
                             var name = line.Substring(1, endname - 1);
                             var value = line.Substring(endname + 1).Split(',');
                             var title = value.Length == 2 ? value[2] : "";
