@@ -125,6 +125,10 @@ namespace iptvlistsmerger
             StringBuilder targetm3uContent = new StringBuilder();
             targetm3uContent.AppendLine(TargetM3UInfo);
 
+            // add warning about not all working
+            targetm3uContent.AppendLine("#EXTINF:-1 group-title=\"Внимание\",Некоторые не работают!");
+            targetm3uContent.AppendLine("https://warn.warn/Вгимание.m3u8");
+
             //first add groups by selected list
             HashSet<string> groups = new HashSet<string>
             {
