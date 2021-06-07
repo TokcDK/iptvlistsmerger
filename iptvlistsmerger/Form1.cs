@@ -20,6 +20,8 @@ namespace iptvlistsmerger
 
         private void btnMerge_Click(object sender, EventArgs e)
         {
+            lblInfo.Text = "";
+
             if (!string.IsNullOrWhiteSpace(tbSource.Text) && tbSource.Text != Source)
             {
                 Source = tbSource.Text;
@@ -51,6 +53,8 @@ namespace iptvlistsmerger
             }
 
             MargeInTarget();
+
+            lblInfo.Text = "Finished!" + DateTime.Now;
         }
 
         Dictionary<string, List<string>> TargetListContent = new Dictionary<string, List<string>>();
@@ -68,16 +72,13 @@ namespace iptvlistsmerger
                         continue;
                     }
 
-                    var value = item.Value;
+                    var tags = item.Value;
+                    var source = item.Key;
                     var EXTGRP = false;
                     var grouptitle = false;
-                    if (!(grouptitle = value.Contains("group-title")) && !(EXTGRP = value.Contains("#EXTGRP")))
+                    if ((!(grouptitle = tags.Contains("group-title")) && !(EXTGRP = tags.Contains("#EXTGRP"))))
                     {
-                        var parts = value.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-                        var reg = Regex.Match(parts[0], @"#EXTINF:(-?[0-9]{1,12})");
-                        var groupName = (lastGroup.Length == 0 ? "group-title=\"Разное\"" : lastGroup);
-                        parts[0] = parts[0].Insert(parts[0].IndexOf(reg.Result("$1")) + reg.Result("$1").Length, " " + groupName);
-                        value = string.Join("\r\n", parts);
+                        tags = SetGroupTitle(tags, lastGroup, out string groupName);
                         lastGroup = groupName;
                     }
                     else
@@ -93,7 +94,7 @@ namespace iptvlistsmerger
                         }
 
                         StringBuilder groupName = new StringBuilder();
-                        foreach (var c in value.Substring(value.IndexOf(tag) + tag.Length))
+                        foreach (var c in tags.Substring(tags.IndexOf(tag) + tag.Length))
                         {
                             if (c == c1 || c == c2)
                             {
@@ -103,6 +104,11 @@ namespace iptvlistsmerger
                             groupName.Append(c);
                         }
                         lastGroup = groupName.ToString().Trim();
+
+                        if (!grouptitle)
+                        {
+                            tags = SetGroupTitle(tags, lastGroup, out string gn, EXTGRP);
+                        }
                     }
 
 
@@ -110,8 +116,8 @@ namespace iptvlistsmerger
                     {
                         TargetListContent.Add(lastGroup, new List<string>()); // add group if missing
                     }
-                    TargetListContent[lastGroup].Add(item.Value + "\r\n" + item.Key); // add record to group
-                    TargetListContentAdded.Add(item.Key); // add source stream link to control duplicates
+                    TargetListContent[lastGroup].Add(tags + "\r\n" + source); // add record to group
+                    TargetListContentAdded.Add(source); // add source stream link to control duplicates
                 }
             }
 
@@ -122,12 +128,14 @@ namespace iptvlistsmerger
             //first add groups by selected list
             HashSet<string> groups = new HashSet<string>
             {
-                "Российские",
                 "Федеральные",
+                "Российские",
                 "Россия",
+                "Юмор",
                 "Кино",
                 "Спорт",
-                "Познавательные"
+                "Познавательные",
+                "HD"
             };
             foreach (var group in groups)
             {
@@ -168,7 +176,7 @@ namespace iptvlistsmerger
             //add rest of groups records by sorted list
             foreach (var group in groupslist)
             {
-                if (groups.Contains(group)) // skip already added groups
+                if (groups.Contains(group) || skipgroupslist.Contains(group)) // skip already added groups and excluded groups
                 {
                     continue;
                 }
@@ -181,6 +189,16 @@ namespace iptvlistsmerger
 
             // write target playlist
             File.WriteAllText(Target, targetm3uContent.ToString());
+        }
+
+        private string SetGroupTitle(string value, string lastGroup, out string groupName, bool EXTGRP = false)
+        {
+            var parts = value.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            var reg = Regex.Match(parts[0], @"#EXTINF:(-?[0-9]{1,12})");
+            groupName = (EXTGRP || lastGroup.Length > 0 ? lastGroup : "Разное");
+            parts[0] = parts[0].Insert(parts[0].IndexOf(reg.Result("$1")) + reg.Result("$1").Length, " group-title=\"" + groupName + "\"");
+
+            return string.Join("\r\n", parts);
         }
 
         List<playlist> listsContents = new List<playlist>();
