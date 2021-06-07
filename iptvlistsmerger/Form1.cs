@@ -139,7 +139,7 @@ namespace iptvlistsmerger
             HashSet<string> groups = new HashSet<string>();
             if (File.Exists("sortg.txt"))
             {
-                foreach (var line in File.ReadAllLines("add1.txt"))
+                foreach (var line in File.ReadAllLines("sortg.txt"))
                 {
                     groups.Add(line);
                 }
@@ -165,8 +165,16 @@ namespace iptvlistsmerger
             }
             Array.Sort(groupslist);
 
-            //skip list to skip grops
+            // skip list to skip grops
+            // check if exists file skipg.txt and add list of groups from there
             HashSet<string> skipgroupslist = new HashSet<string>();
+            if (File.Exists("skipg.txt"))
+            {
+                foreach (var line in File.ReadAllLines("skipg.txt"))
+                {
+                    skipgroupslist.Add(line);
+                }
+            }
 
             //add rest of groups records by sorted list
             foreach (var group in groupslist)
