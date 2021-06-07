@@ -132,6 +132,7 @@ namespace iptvlistsmerger
             //first add groups by selected list
             HashSet<string> groups = new HashSet<string>
             {
+                "Внимание",
                 "Федеральные",
                 "Российские",
                 "Россия",
