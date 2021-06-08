@@ -63,7 +63,7 @@ namespace iptvlistsmerger
             ParseList(list.FullName);
         }
 
-        Dictionary<string, List<string>> TargetListContent = new Dictionary<string, List<string>>();
+        Dictionary<string, List<record>> TargetListContent = new Dictionary<string, List<record>>();
         HashSet<string> TargetListContentAdded = new HashSet<string>();
 
         private void MargeInTarget()
@@ -120,9 +120,10 @@ namespace iptvlistsmerger
 
                     if (!TargetListContent.ContainsKey(lastGroup))
                     {
-                        TargetListContent.Add(lastGroup, new List<string>()); // add group if missing
+                        TargetListContent.Add(lastGroup, new List<record>()); // add group if missing
                     }
-                    TargetListContent[lastGroup].Add(tags + "\r\n" + source); // add record to group
+                    string title = Regex.Match(tags, @"#EXTINF[^,]+,([^\r\n]+).*").Result("$1");
+                    TargetListContent[lastGroup].Add(new record(source, tags, title)); // add record to group
                     TargetListContentAdded.Add(source); // add source stream link to control duplicates
                 }
             }
@@ -164,14 +165,14 @@ namespace iptvlistsmerger
             {
                 if (TargetListContent.ContainsKey(group))
                 {
-                    foreach (var record in TargetListContent[group])
+                    foreach (var record in TargetListContent[group].OrderBy(r=>r.title))
                     {
-                        if (record.HasSkipwordFrom(skipwords))
+                        if (record.value.ToUpperInvariant().HasSkipwordFrom(skipwords))
                         {
                             continue;
                         }
 
-                        targetm3uContent.AppendLine(record);
+                        targetm3uContent.AppendLine(record.address+"\r\n"+record.value);
                     }
                 }
             }
@@ -205,14 +206,14 @@ namespace iptvlistsmerger
                     continue;
                 }
 
-                foreach (var record in TargetListContent[group])
+                foreach (var record in TargetListContent[group].OrderBy(r => r.title))
                 {
-                    if (record.ToUpperInvariant().HasSkipwordFrom(skipwords))
+                    if (record.value.ToUpperInvariant().HasSkipwordFrom(skipwords))
                     {
                         continue;
                     }
 
-                    targetm3uContent.AppendLine(record);
+                    targetm3uContent.AppendLine(record.address + "\r\n" + record.value);
                 }
             }
 
@@ -348,16 +349,15 @@ namespace iptvlistsmerger
     }
     public class record
     {
-        Dictionary<string, string> Attributes;
-        Dictionary<string, string> Extras;
-        public string line;
+        public string address;
+        public string value;
+        public string title;
 
-        public record()
+        public record(string address, string value, string title)
         {
-        }
-
-        void parseline(string line)
-        {
+            this.address = address;
+            this.value = value;
+            this.title = title;
         }
     }
 }
