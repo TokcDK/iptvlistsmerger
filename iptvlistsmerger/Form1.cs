@@ -128,7 +128,7 @@ namespace iptvlistsmerger
             // check if exists file add1.txt and add lines from there right adter m3u info
             if (File.Exists("add1.txt"))
             {
-                foreach(var line in File.ReadAllLines("add1.txt"))
+                foreach (var line in File.ReadAllLines("add1.txt"))
                 {
                     targetm3uContent.AppendLine(line);
                 }
@@ -215,7 +215,10 @@ namespace iptvlistsmerger
             var pl = new playlist();
             pl.Read(list);
 
-            listsContents.Add(pl);
+            if (pl?.items.Count > 0)
+            {
+                listsContents.Add(pl);
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
