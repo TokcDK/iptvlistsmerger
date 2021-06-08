@@ -121,6 +121,16 @@ namespace iptvlistsmerger
                 }
             }
 
+            // read list of skip words
+            HashSet<string> skipwords = new HashSet<string>();
+            if (File.Exists("skipw.txt"))
+            {
+                foreach (var line in File.ReadAllLines("skipw.txt"))
+                {
+                    skipwords.Add(line);
+                }
+            }
+
             //create target playlist content and add header m3u info
             StringBuilder targetm3uContent = new StringBuilder();
             targetm3uContent.AppendLine(TargetM3UInfo);
@@ -150,6 +160,11 @@ namespace iptvlistsmerger
                 {
                     foreach (var record in TargetListContent[group])
                     {
+                        if (record.HasSkipwordFrom(skipwords))
+                        {
+                            continue;
+                        }
+
                         targetm3uContent.AppendLine(record);
                     }
                 }
@@ -186,6 +201,11 @@ namespace iptvlistsmerger
 
                 foreach (var record in TargetListContent[group])
                 {
+                    if (record.HasSkipwordFrom(skipwords))
+                    {
+                        continue;
+                    }
+
                     targetm3uContent.AppendLine(record);
                 }
             }
@@ -225,6 +245,22 @@ namespace iptvlistsmerger
         {
             tbSource.Text = Source;
             tbTarget.Text = Target;
+        }
+    }
+
+    public static class Extensions
+    {
+        public static bool HasSkipwordFrom(this string record, HashSet<string> skipwords)
+        {
+            foreach (var word in skipwords)
+            {
+                if (record.Contains(word))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 
@@ -287,17 +323,6 @@ namespace iptvlistsmerger
                             IstrackInfo = true;
                             rlines.Clear();
                             rlines.Append(line);
-                            //var data = line.Split(':');
-                            //var name = data[0];
-                            //var value = data[1].Split(',');
-                            //var title = value.Length == 2 ? value[2] : "";
-                            //var attributes = value[0];
-
-                            //foreach (var att in attributes.Split(' ', (char)StringSplitOptions.RemoveEmptyEntries))
-                            //{
-                            //    r.line = line;
-                            //}
-
                         }
                         else if (IstrackInfo)
                         {
