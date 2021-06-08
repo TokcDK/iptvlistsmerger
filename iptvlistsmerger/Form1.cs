@@ -53,7 +53,7 @@ namespace iptvlistsmerger
                 ParseList(Source);
             }
 
-            MargeInTarget();
+            MergeInTarget();
 
             lblInfo.Text = "Finished!" + DateTime.Now;
         }
@@ -66,7 +66,7 @@ namespace iptvlistsmerger
         Dictionary<string, List<record>> TargetListContent = new Dictionary<string, List<record>>();
         HashSet<string> TargetListContentAdded = new HashSet<string>();
 
-        private void MargeInTarget()
+        private void MergeInTarget()
         {
             foreach (var listContent in listsContents)
             {
@@ -81,6 +81,7 @@ namespace iptvlistsmerger
                     var tags = item.Value;
                     var source = item.Key;
                     var EXTGRP = false;
+
                     var grouptitle = false;
                     if ((!(grouptitle = tags.Contains("group-title")) && !(EXTGRP = tags.Contains("#EXTGRP"))))
                     {
@@ -165,14 +166,14 @@ namespace iptvlistsmerger
             {
                 if (TargetListContent.ContainsKey(group))
                 {
-                    foreach (var record in TargetListContent[group].OrderBy(r=>r.title))
+                    foreach (var record in TargetListContent[group].OrderBy(r => r.title))
                     {
                         if (record.value.ToUpperInvariant().HasSkipwordFrom(skipwords))
                         {
                             continue;
                         }
 
-                        targetm3uContent.AppendLine(record.address+"\r\n"+record.value);
+                        targetm3uContent.AppendLine(record.value + "\r\n" + record.address);
                     }
                 }
             }
@@ -213,7 +214,7 @@ namespace iptvlistsmerger
                         continue;
                     }
 
-                    targetm3uContent.AppendLine(record.address + "\r\n" + record.value);
+                    targetm3uContent.AppendLine(record.value + "\r\n" + record.address);
                 }
             }
 
