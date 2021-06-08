@@ -133,7 +133,7 @@ namespace iptvlistsmerger
             {
                 foreach (var line in File.ReadAllLines("skipw.txt"))
                 {
-                    skipwords.Add(line);
+                    skipwords.Add(line.ToUpperInvariant());
                 }
             }
 
@@ -193,21 +193,21 @@ namespace iptvlistsmerger
             {
                 foreach (var line in File.ReadAllLines("skipg.txt"))
                 {
-                    skipgroupslist.Add(line);
+                    skipgroupslist.Add(line.ToUpperInvariant());
                 }
             }
 
             //add rest of groups records by sorted list
             foreach (var group in groupslist)
             {
-                if (groups.Contains(group) || skipgroupslist.Contains(group)) // skip already added groups and excluded groups
+                if (groups.Contains(group) || skipgroupslist.Contains(group.ToUpperInvariant())) // skip already added groups and excluded groups
                 {
                     continue;
                 }
 
                 foreach (var record in TargetListContent[group])
                 {
-                    if (record.HasSkipwordFrom(skipwords))
+                    if (record.ToUpperInvariant().HasSkipwordFrom(skipwords))
                     {
                         continue;
                     }
