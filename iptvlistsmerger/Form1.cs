@@ -42,7 +42,7 @@ namespace iptvlistsmerger
 
             if (SourceIsDir)
             {
-                foreach (var list in Directory.GetFiles(Source, "*.m3u", SearchOption.AllDirectories))
+                foreach (var list in Directory.GetFiles(Source, "*.m3u?", SearchOption.AllDirectories))
                 {
                     ParseList(list);
                 }
@@ -207,7 +207,7 @@ namespace iptvlistsmerger
         List<playlist> listsContents = new List<playlist>();
         private void ParseList(string list)
         {
-            if (Path.GetExtension(list) != ".m3u")
+            if (!Path.GetExtension(list).ToUpperInvariant().StartsWith(".M3U"))
             {
                 return;
             }
