@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -42,7 +43,7 @@ namespace iptvlistsmerger
 
             if (SourceIsDir)
             {
-                foreach (var list in Directory.GetFiles(Source, "*.m3u?", SearchOption.AllDirectories))
+                foreach (var list in new DirectoryInfo(Source).GetFiles("*.m3u?", SearchOption.AllDirectories).OrderByDescending(f => f.LastWriteTime.Year <= 1601 ? f.CreationTime : f.LastWriteTime)/*https://stackoverflow.com/a/23839158*/)
                 {
                     ParseList(list);
                 }
@@ -55,6 +56,11 @@ namespace iptvlistsmerger
             MargeInTarget();
 
             lblInfo.Text = "Finished!" + DateTime.Now;
+        }
+
+        private void ParseList(FileInfo list)
+        {
+            ParseList(list.FullName);
         }
 
         Dictionary<string, List<string>> TargetListContent = new Dictionary<string, List<string>>();
