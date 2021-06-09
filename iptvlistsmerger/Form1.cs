@@ -72,6 +72,9 @@ namespace iptvlistsmerger
             // check if exists file skipg.txt and add list of groups from there
             HashSet<string> skipgroupslist = SetList("skipg.txt", true);
 
+            // rename groups list.
+            Dictionary<string, string> rengroupslist = SetDict("reng.txt");
+
             foreach (var listContent in listsContents)
             {
                 string lastGroup = "";
@@ -122,11 +125,31 @@ namespace iptvlistsmerger
                         }
                     }
 
+                    // skip group
                     if (skipgroupslist.Contains(lastGroup))
                     {
-                        continue; // skip group. same adress will not be ignored in other group
+                        continue; // In this case same adress will not be ignored in other group
                     }
 
+                    // rename group name
+                    if (rengroupslist.ContainsKey(lastGroup.ToUpperInvariant()))
+                    {
+                        string GROUP = lastGroup.ToUpperInvariant();
+                        // in tags
+                        foreach (var r in new[] { @"group-title\=\""" + lastGroup.Replace("+", @"\+") + @"\""", "#EXTGRP:[ ]*" + lastGroup.Replace("+", @"\+") })
+                        {
+                            Match m = Regex.Match(tags, r);
+                            if (m.Success)
+                            {
+                                tags = tags.Replace(m.Value, m.Value.Replace(lastGroup, rengroupslist[GROUP]));
+                            }
+                        }
+
+                        // group name itself
+                        lastGroup = rengroupslist[GROUP];
+                    }
+
+                    // add new record
                     if (!TargetListContent.ContainsKey(lastGroup))
                     {
                         TargetListContent.Add(lastGroup, new List<Record>()); // add group if missing
@@ -246,6 +269,33 @@ namespace iptvlistsmerger
             return list;
         }
 
+        private Dictionary<string, string> SetDict(string filepath, string splitter = "=", bool caseinsensitive = true)
+        {
+            var list = new Dictionary<string, string>();
+            if (File.Exists(filepath))
+            {
+                foreach (var line in File.ReadAllLines(filepath))
+                {
+                    if (string.IsNullOrWhiteSpace(line) || line.StartsWith("//"))
+                    {
+                        continue; // skip empty and commented lines
+                    }
+
+                    string[] splitted = line.Split(new[] { splitter }, StringSplitOptions.RemoveEmptyEntries);
+                    if (splitted.Length != 2)
+                    {
+                        continue;
+                    }
+
+                    string key = caseinsensitive ? splitted[0].ToUpperInvariant() : splitted[0];
+                    if (!list.ContainsKey(key))
+                        list.Add(key, splitted[1]);
+                }
+            }
+
+            return list;
+        }
+
         private string SetGroupTitle(string value, string lastGroup, out string groupName, bool EXTGRP = false)
         {
             var parts = value.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
@@ -282,11 +332,11 @@ namespace iptvlistsmerger
 
     public static class Extensions
     {
-        public static bool HasSkipwordFrom(this string record, HashSet<string> skipwords, HashSet<string> dontskipwords=null)
+        public static bool HasSkipwordFrom(this string record, HashSet<string> skipwords, HashSet<string> dontskipwords = null)
         {
             foreach (var word in skipwords)
             {
-                if (record.Contains(word) && (dontskipwords==null || (dontskipwords!=null && !record.HasSkipwordFrom(dontskipwords))))
+                if (record.Contains(word) && (dontskipwords == null || (dontskipwords != null && !record.HasSkipwordFrom(dontskipwords))))
                 {
                     return true;
                 }
