@@ -144,24 +144,14 @@ namespace iptvlistsmerger
             targetm3uContent.AppendLine(TargetM3UInfo);
 
             // check if exists file add1.txt and add lines from there right adter m3u info
-            if (File.Exists("add1.txt"))
+            foreach (var line in SetList("add1.txt"))
             {
-                foreach (var line in File.ReadAllLines("add1.txt"))
-                {
-                    targetm3uContent.AppendLine(line);
-                }
+                targetm3uContent.AppendLine(line);
             }
 
             // first add groups by selected list
             // check if exists file sortg.txt and add list of groups from there
-            HashSet<string> groups = new HashSet<string>();
-            if (File.Exists("sortg.txt"))
-            {
-                foreach (var line in File.ReadAllLines("sortg.txt"))
-                {
-                    groups.Add(line);
-                }
-            }
+            HashSet<string> groups = SetList("sortg.txt");
             foreach (var group in groups)
             {
                 if (TargetListContent.ContainsKey(group))
@@ -190,14 +180,7 @@ namespace iptvlistsmerger
 
             // skip list to skip grops
             // check if exists file skipg.txt and add list of groups from there
-            HashSet<string> skipgroupslist = new HashSet<string>();
-            if (File.Exists("skipg.txt"))
-            {
-                foreach (var line in File.ReadAllLines("skipg.txt"))
-                {
-                    skipgroupslist.Add(line.ToUpperInvariant());
-                }
-            }
+            HashSet<string> skipgroupslist = SetList("skipg.txt");
 
             //add rest of groups records by sorted list
             foreach (var group in groupslist)
@@ -220,6 +203,25 @@ namespace iptvlistsmerger
 
             // write target playlist
             File.WriteAllText(Target, targetm3uContent.ToString());
+        }
+
+        private HashSet<string> SetList(string filepath)
+        {
+            var list = new HashSet<string>();
+            if (File.Exists(filepath))
+            {
+                foreach (var line in File.ReadAllLines("sortg.txt"))
+                {
+                    if (string.IsNullOrWhiteSpace(line) || line.StartsWith("//"))
+                    {
+                        continue; // skip empty and commented lines
+                    }
+
+                    list.Add(line);
+                }
+            }
+
+            return list;
         }
 
         private string SetGroupTitle(string value, string lastGroup, out string groupName, bool EXTGRP = false)
