@@ -68,6 +68,10 @@ namespace iptvlistsmerger
 
         private void MergeInTarget()
         {
+            // skip list to skip grops
+            // check if exists file skipg.txt and add list of groups from there
+            HashSet<string> skipgroupslist = SetList("skipg.txt", true);
+
             foreach (var listContent in listsContents)
             {
                 string lastGroup = "";
@@ -118,6 +122,10 @@ namespace iptvlistsmerger
                         }
                     }
 
+                    if (skipgroupslist.Contains(lastGroup))
+                    {
+                        continue; // skip group. same adress will not be ignored in other group
+                    }
 
                     if (!TargetListContent.ContainsKey(lastGroup))
                     {
@@ -179,10 +187,6 @@ namespace iptvlistsmerger
                 i++;
             }
             Array.Sort(groupslist);
-
-            // skip list to skip grops
-            // check if exists file skipg.txt and add list of groups from there
-            HashSet<string> skipgroupslist = SetList("skipg.txt", true);
 
             // last add groups by selected list
             HashSet<string> lastgroups = SetList("lastg.txt");
