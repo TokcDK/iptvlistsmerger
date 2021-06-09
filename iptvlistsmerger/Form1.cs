@@ -282,11 +282,11 @@ namespace iptvlistsmerger
 
     public static class Extensions
     {
-        public static bool HasSkipwordFrom(this string record, HashSet<string> skipwords, HashSet<string> dontskipwords)
+        public static bool HasSkipwordFrom(this string record, HashSet<string> skipwords, HashSet<string> dontskipwords=null)
         {
             foreach (var word in skipwords)
             {
-                if (record.Contains(word) && !record.HasSkipwordFrom(skipwords, dontskipwords))
+                if (record.Contains(word) && (dontskipwords==null || (dontskipwords!=null && !record.HasSkipwordFrom(dontskipwords))))
                 {
                     return true;
                 }
