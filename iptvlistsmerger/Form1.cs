@@ -17,9 +17,9 @@ namespace iptvlistsmerger
 
         string Source = @".\Sources\";
         string Target = @".\Target.m3u";
-        string TargetM3UInfo = "#EXTM3U url-tvg=\"http://epg.it999.ru/edem.xml.gz\" deinterlace=1 cache=1000";
+        readonly string TargetM3UInfo = "#EXTM3U url-tvg=\"http://epg.it999.ru/edem.xml.gz\" deinterlace=1 cache=1000";
 
-        private void btnMerge_Click(object sender, EventArgs e)
+        private void BtnMerge_Click(object sender, EventArgs e)
         {
             lblInfo.Text = "";
 
@@ -63,8 +63,8 @@ namespace iptvlistsmerger
             ParseList(list.FullName);
         }
 
-        Dictionary<string, List<record>> TargetListContent = new Dictionary<string, List<record>>();
-        HashSet<string> TargetListContentAdded = new HashSet<string>();
+        readonly Dictionary<string, List<Record>> TargetListContent = new Dictionary<string, List<Record>>();
+        readonly HashSet<string> TargetListContentAdded = new HashSet<string>();
 
         private void MergeInTarget()
         {
@@ -121,10 +121,10 @@ namespace iptvlistsmerger
 
                     if (!TargetListContent.ContainsKey(lastGroup))
                     {
-                        TargetListContent.Add(lastGroup, new List<record>()); // add group if missing
+                        TargetListContent.Add(lastGroup, new List<Record>()); // add group if missing
                     }
                     string title = Regex.Match(tags, @"#EXTINF[^,]+,([^\r\n]+).*").Result("$1");
-                    TargetListContent[lastGroup].Add(new record(source, tags, title)); // add record to group
+                    TargetListContent[lastGroup].Add(new Record(source, tags, title)); // add record to group
                     TargetListContentAdded.Add(source); // add source stream link to control duplicates
                 }
 
@@ -236,7 +236,7 @@ namespace iptvlistsmerger
             return string.Join("\r\n", parts);
         }
 
-        List<playlist> listsContents = new List<playlist>();
+        readonly List<Playlist> listsContents = new List<Playlist>();
         private void ParseList(string list)
         {
             if (!Path.GetExtension(list).ToUpperInvariant().StartsWith(".M3U"))
@@ -244,7 +244,7 @@ namespace iptvlistsmerger
                 return;
             }
 
-            var pl = new playlist();
+            var pl = new Playlist();
             pl.Read(list);
 
             if (pl?.items.Count > 0)
@@ -276,7 +276,7 @@ namespace iptvlistsmerger
         }
     }
 
-    public class playlist
+    public class Playlist
     {
         public List<string> Extm3uInfo;
         public Dictionary<string, string> items;
@@ -346,19 +346,19 @@ namespace iptvlistsmerger
             }
         }
 
-        public playlist()
+        public Playlist()
         {
             Extm3uInfo = new List<string>();
             items = new Dictionary<string, string>();
         }
     }
-    public class record
+    public class Record
     {
         public string address;
         public string value;
         public string title;
 
-        public record(string address, string value, string title)
+        public Record(string address, string value, string title)
         {
             this.address = address;
             this.value = value;
