@@ -140,10 +140,10 @@ namespace iptvlistsmerger
             }
 
             // read list of skip words
-            HashSet<string> dontskipwords = SetList("!skipw.txt");
+            HashSet<string> dontskipwords = SetList("!skipw.txt", true);
 
             // read list of skip words
-            HashSet<string> skipwords = SetList("skipw.txt");
+            HashSet<string> skipwords = SetList("skipw.txt", true);
 
             //create target playlist content and add header m3u info
             StringBuilder targetm3uContent = new StringBuilder();
