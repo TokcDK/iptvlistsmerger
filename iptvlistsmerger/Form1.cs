@@ -140,14 +140,10 @@ namespace iptvlistsmerger
             }
 
             // read list of skip words
-            HashSet<string> skipwords = new HashSet<string>();
-            if (File.Exists("skipw.txt"))
-            {
-                foreach (var line in File.ReadAllLines("skipw.txt"))
-                {
-                    skipwords.Add(line.ToUpperInvariant());
-                }
-            }
+            HashSet<string> dontskipwords = SetList("!skipw.txt");
+
+            // read list of skip words
+            HashSet<string> skipwords = SetList("skipw.txt");
 
             //create target playlist content and add header m3u info
             StringBuilder targetm3uContent = new StringBuilder();
@@ -168,7 +164,7 @@ namespace iptvlistsmerger
                 {
                     foreach (var record in TargetListContent[group].OrderBy(r => r.title))
                     {
-                        if (record.value.ToUpperInvariant().HasSkipwordFrom(skipwords))
+                        if (record.value.ToUpperInvariant().HasSkipwordFrom(skipwords, dontskipwords))
                         {
                             continue;
                         }
@@ -201,7 +197,7 @@ namespace iptvlistsmerger
 
                 foreach (var record in TargetListContent[group].OrderBy(r => r.title))
                 {
-                    if (record.value.ToUpperInvariant().HasSkipwordFrom(skipwords))
+                    if (record.value.ToUpperInvariant().HasSkipwordFrom(skipwords, dontskipwords))
                     {
                         continue;
                     }
@@ -217,7 +213,7 @@ namespace iptvlistsmerger
                 {
                     foreach (var record in TargetListContent[group].OrderBy(r => r.title))
                     {
-                        if (record.value.ToUpperInvariant().HasSkipwordFrom(skipwords))
+                        if (record.value.ToUpperInvariant().HasSkipwordFrom(skipwords, dontskipwords))
                         {
                             continue;
                         }
@@ -286,11 +282,11 @@ namespace iptvlistsmerger
 
     public static class Extensions
     {
-        public static bool HasSkipwordFrom(this string record, HashSet<string> skipwords)
+        public static bool HasSkipwordFrom(this string record, HashSet<string> skipwords, HashSet<string> dontskipwords)
         {
             foreach (var word in skipwords)
             {
-                if (record.Contains(word))
+                if (record.Contains(word) && !record.HasSkipwordFrom(skipwords, dontskipwords))
                 {
                     return true;
                 }
