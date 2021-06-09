@@ -152,9 +152,9 @@ namespace iptvlistsmerger
             }
 
             // first add groups by selected list
-            // check if exists file sortg.txt and add list of groups from there
-            HashSet<string> groups = SetList("sortg.txt");
-            foreach (var group in groups)
+            // check if exists file firstg.txt and add list of groups from there
+            HashSet<string> firstgroups = SetList("firstg.txt");
+            foreach (var group in firstgroups)
             {
                 if (TargetListContent.ContainsKey(group))
                 {
@@ -182,12 +182,15 @@ namespace iptvlistsmerger
 
             // skip list to skip grops
             // check if exists file skipg.txt and add list of groups from there
-            HashSet<string> skipgroupslist = SetList("skipg.txt");
+            HashSet<string> skipgroupslist = SetList("skipg.txt", true);
 
-            //add rest of groups records by sorted list
+            // last add groups by selected list
+            HashSet<string> lastgroups = SetList("lastg.txt");
+
+            //add groups and records by sorted list
             foreach (var group in groupslist)
             {
-                if (groups.Contains(group) || skipgroupslist.Contains(group.ToUpperInvariant())) // skip already added groups and excluded groups
+                if (firstgroups.Contains(group)/*first groups was already added*/ || lastgroups.Contains(group)/*last groups will be added in the end*/ || skipgroupslist.Contains(group.ToUpperInvariant())/*skip excluded groups*/)
                 {
                     continue;
                 }
@@ -203,23 +206,40 @@ namespace iptvlistsmerger
                 }
             }
 
+            // check if exists file lastg.txt and add list of groups from there
+            foreach (var group in lastgroups)
+            {
+                if (TargetListContent.ContainsKey(group))
+                {
+                    foreach (var record in TargetListContent[group].OrderBy(r => r.title))
+                    {
+                        if (record.value.ToUpperInvariant().HasSkipwordFrom(skipwords))
+                        {
+                            continue;
+                        }
+
+                        targetm3uContent.AppendLine(record.value + "\r\n" + record.address);
+                    }
+                }
+            }
+
             // write target playlist
             File.WriteAllText(Target, targetm3uContent.ToString());
         }
 
-        private HashSet<string> SetList(string filepath)
+        private HashSet<string> SetList(string filepath, bool toupper = false)
         {
             var list = new HashSet<string>();
             if (File.Exists(filepath))
             {
-                foreach (var line in File.ReadAllLines("sortg.txt"))
+                foreach (var line in File.ReadAllLines(filepath))
                 {
                     if (string.IsNullOrWhiteSpace(line) || line.StartsWith("//"))
                     {
                         continue; // skip empty and commented lines
                     }
 
-                    list.Add(line);
+                    list.Add(toupper ? line.ToUpperInvariant() : line);
                 }
             }
 
