@@ -127,6 +127,8 @@ namespace iptvlistsmerger
                     TargetListContent[lastGroup].Add(new record(source, tags, title)); // add record to group
                     TargetListContentAdded.Add(source); // add source stream link to control duplicates
                 }
+
+                lastGroup = "";
             }
 
             // read list of skip words
@@ -227,7 +229,7 @@ namespace iptvlistsmerger
         private string SetGroupTitle(string value, string lastGroup, out string groupName, bool EXTGRP = false)
         {
             var parts = value.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-            var reg = Regex.Match(parts[0], @"#EXTINF:(-?[0-9]{1,12})");
+            var reg = Regex.Match(parts[0], @"#EXTINF(:)");
             groupName = (EXTGRP || lastGroup.Length > 0 ? lastGroup : "Разное");
             parts[0] = parts[0].Insert(parts[0].IndexOf(reg.Result("$1")) + reg.Result("$1").Length, " group-title=\"" + groupName + "\"");
 
