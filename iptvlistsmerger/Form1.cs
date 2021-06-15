@@ -32,6 +32,8 @@ namespace iptvlistsmerger
                 Target = tbTarget.Text;
             }
 
+            var rawTargetPath = Target;
+
             Source = Path.GetFullPath(Source);
             Target = Path.GetFullPath(Target);
 
@@ -40,6 +42,8 @@ namespace iptvlistsmerger
             {
                 return;
             }
+
+            cbxTargets.UpdateTargets(rawTargetPath);
 
             if (SourceIsDir)
             {
@@ -330,24 +334,19 @@ namespace iptvlistsmerger
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            tbSource.Text = Source;
-            tbTarget.Text = Target;
-        }
-    }
-
-    public static class Extensions
-    {
-        public static bool HasSkipwordFrom(this string record, HashSet<string> skipwords, HashSet<string> dontskipwords = null)
-        {
-            foreach (var word in skipwords)
+            if (Properties.Settings.Default.TargetsList == null)
             {
-                if (record.Contains(word) && (dontskipwords == null || (dontskipwords != null && !record.HasSkipwordFrom(dontskipwords))))
-                {
-                    return true;
-                }
+                Properties.Settings.Default.TargetsList = new System.Collections.Specialized.StringCollection();
             }
 
-            return false;
+            tbSource.Text = Source;
+            tbTarget.Text = Target;
+            cbxTargets.Items.AddRange(Properties.Settings.Default.TargetsList.ToArray());
+        }
+
+        private void cbxTargets_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            tbTarget.Text = cbxTargets.Text;
         }
     }
 
