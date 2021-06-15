@@ -77,7 +77,7 @@ namespace iptvlistsmerger
 
             foreach (var listContent in listsContents)
             {
-                string lastGroup = "";
+                string Group = "";
                 foreach (var item in listContent.items)
                 {
                     if (TargetListContentAdded.Contains(item.Key))
@@ -92,8 +92,8 @@ namespace iptvlistsmerger
                     var grouptitle = false;
                     if ((!(grouptitle = tags.Contains("group-title")) && !(EXTGRP = tags.Contains("#EXTGRP"))))
                     {
-                        tags = SetGroupTitle(tags, lastGroup, out string groupName);
-                        lastGroup = groupName;
+                        tags = SetGroupTitle(tags, Group, out string groupName);
+                        Group = groupName;
                     }
                     else
                     {
@@ -117,49 +117,49 @@ namespace iptvlistsmerger
 
                             groupName.Append(c);
                         }
-                        lastGroup = groupName.ToString().Trim();
+                        Group = groupName.ToString().Trim();
 
                         if (!grouptitle)
                         {
-                            tags = SetGroupTitle(tags, lastGroup, out string gn, EXTGRP);
+                            tags = SetGroupTitle(tags, Group, out string gn, EXTGRP);
                         }
                     }
 
                     // skip group
-                    if (skipgroupslist.Contains(lastGroup))
+                    if (skipgroupslist.Contains(Group))
                     {
                         continue; // In this case same adress will not be ignored in other group
                     }
 
                     // rename group name
-                    if (rengroupslist.ContainsKey(lastGroup.ToUpperInvariant()))
+                    if (rengroupslist.ContainsKey(Group.ToUpperInvariant()))
                     {
-                        string GROUP = lastGroup.ToUpperInvariant();
+                        string GROUP = Group.ToUpperInvariant();
                         // in tags
-                        foreach (var r in new[] { @"group-title\=\""" + lastGroup.Replace("+", @"\+") + @"\""", "#EXTGRP:[ ]*" + lastGroup.Replace("+", @"\+") })
+                        foreach (var r in new[] { @"group-title\=\""" + Group.Replace("+", @"\+") + @"\""", "#EXTGRP:[ ]*" + Group.Replace("+", @"\+") })
                         {
                             Match m = Regex.Match(tags, r);
                             if (m.Success)
                             {
-                                tags = tags.Replace(m.Value, m.Value.Replace(lastGroup, rengroupslist[GROUP]));
+                                tags = tags.Replace(m.Value, m.Value.Replace(Group, rengroupslist[GROUP]));
                             }
                         }
 
                         // group name itself
-                        lastGroup = rengroupslist[GROUP];
+                        Group = rengroupslist[GROUP];
                     }
 
                     // add new record
-                    if (!TargetListContent.ContainsKey(lastGroup))
+                    if (!TargetListContent.ContainsKey(Group))
                     {
-                        TargetListContent.Add(lastGroup, new List<Record>()); // add group if missing
+                        TargetListContent.Add(Group, new List<Record>()); // add group if missing
                     }
                     string title = Regex.Match(tags, @"#EXTINF[^,]+,([^\r\n]+).*").Result("$1");
-                    TargetListContent[lastGroup].Add(new Record(source, tags, title)); // add record to group
+                    TargetListContent[Group].Add(new Record(source, tags, title)); // add record to group
                     TargetListContentAdded.Add(source); // add source stream link to control duplicates
-                }
 
-                lastGroup = "";
+                    Group = "";
+                }
             }
 
             // read list of skip words
