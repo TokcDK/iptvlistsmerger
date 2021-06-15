@@ -31,6 +31,27 @@ namespace iptvlistsmerger
         }
 
         /// <summary>
+        /// check if string contains any substring from skipwords.
+        /// when dontskipwords is true, ignore skipword if it is in dontskipwors list.
+        /// </summary>
+        /// <param name="record"></param>
+        /// <param name="skipwords"></param>
+        /// <param name="dontskipwords"></param>
+        /// <returns>skipword if found else null</returns>
+        public static string HasSkipwordFromDict(this string record, Dictionary<string, string> skipwords)
+        {
+            foreach (var word in skipwords.Keys)
+            {
+                if (record.Contains(word))
+                {
+                    return word;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// get all elements to string array.
         /// </summary>
         /// <param name="stringcollection"></param>

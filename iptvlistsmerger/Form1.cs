@@ -74,14 +74,15 @@ namespace iptvlistsmerger
         {
             // skip list to skip grops
             // check if exists file skipg.txt and add list of groups from there
-            HashSet<string> skipgroupslist = SetList("skipg.txt", true);
+            var skipgroupslist = SetList("skipg.txt", true);
 
             // rename groups list.
-            Dictionary<string, string> rengroupslist = SetDict("reng.txt");
+            var rengroupslist = SetDict("reng.txt", true);
+            var movebywordlist = SetDict("rengbyw.txt", true);
 
             foreach (var listContent in listsContents)
             {
-                string Group = "";
+                string GroupTitle = "";
                 foreach (var item in listContent.items)
                 {
                     if (TargetListContentAdded.Contains(item.Key))
@@ -93,11 +94,11 @@ namespace iptvlistsmerger
                     var source = item.Key;
                     var EXTGRP = false;
 
-                    var grouptitle = false;
-                    if ((!(grouptitle = tags.Contains("group-title")) && !(EXTGRP = tags.Contains("#EXTGRP"))))
+                    var isgrouptitle = false;
+                    if ((!(isgrouptitle = tags.Contains("group-title")) && !(EXTGRP = tags.Contains("#EXTGRP"))))
                     {
-                        tags = SetGroupTitle(tags, Group, out string groupName);
-                        Group = groupName;
+                        tags = SetGroupTitle(tags, GroupTitle, out string groupName);
+                        GroupTitle = groupName;
                     }
                     else
                     {
@@ -121,48 +122,60 @@ namespace iptvlistsmerger
 
                             groupName.Append(c);
                         }
-                        Group = groupName.ToString().Trim();
+                        GroupTitle = groupName.ToString().Trim();
 
-                        if (!grouptitle)
+                        if (!isgrouptitle)
                         {
-                            tags = SetGroupTitle(tags, Group, out string gn, EXTGRP);
+                            tags = SetGroupTitle(tags, GroupTitle, out string gn, EXTGRP);
                         }
                     }
 
                     // skip group
-                    if (skipgroupslist.Contains(Group))
+                    if (skipgroupslist.Contains(GroupTitle))
                     {
                         continue; // In this case same adress will not be ignored in other group
                     }
 
+                    // record's title
+                    string title = Regex.Match(tags, @"#EXTINF[^,]+,([^\r\n]+).*").Result("$1");
+
+                    string WORD = null;
+                    string GROUP = GroupTitle.ToUpperInvariant();
+                    bool G;
                     // rename group name
-                    if (rengroupslist.ContainsKey(Group.ToUpperInvariant()))
+                    if (((G = rengroupslist.ContainsKey(GROUP)) && rengroupslist[GROUP] != GroupTitle)
+                        || ((WORD = title.HasSkipwordFromDict(movebywordlist)) != null && movebywordlist[WORD] != GroupTitle))
                     {
-                        string GROUP = Group.ToUpperInvariant();
                         // in tags
-                        foreach (var r in new[] { @"group-title\=\""" + Group.Replace("+", @"\+") + @"\""", "#EXTGRP:[ ]*" + Group.Replace("+", @"\+") })
+                        foreach (var r in new[] { @"group-title\=\""" + GroupTitle.Replace("+", @"\+") + @"\""", "#EXTGRP:[ ]*" + GroupTitle.Replace("+", @"\+") })
                         {
-                            Match m = Regex.Match(tags, r);
+                            Match m = Regex.Match(tags, r, RegexOptions.IgnoreCase);
                             if (m.Success)
                             {
-                                tags = tags.Replace(m.Value, m.Value.Replace(Group, rengroupslist[GROUP]));
+                                if (G)
+                                {
+                                    tags = tags.Replace(m.Value, m.Value.Replace(GroupTitle, rengroupslist[GROUP]));
+                                }
+                                else
+                                {
+                                    tags = tags.Replace(m.Value, m.Value.Replace(GroupTitle, movebywordlist[WORD]));
+                                }
                             }
                         }
 
                         // group name itself
-                        Group = rengroupslist[GROUP];
+                        GroupTitle = G ? rengroupslist[GROUP] : movebywordlist[WORD];
                     }
 
                     // add new record
-                    if (!TargetListContent.ContainsKey(Group))
+                    if (!TargetListContent.ContainsKey(GroupTitle))
                     {
-                        TargetListContent.Add(Group, new List<Record>()); // add group if missing
+                        TargetListContent.Add(GroupTitle, new List<Record>()); // add group if missing
                     }
-                    string title = Regex.Match(tags, @"#EXTINF[^,]+,([^\r\n]+).*").Result("$1");
-                    TargetListContent[Group].Add(new Record(source, tags, title)); // add record to group
+                    TargetListContent[GroupTitle].Add(new Record(source, tags, title)); // add record to group
                     TargetListContentAdded.Add(source); // add source stream link to control duplicates
 
-                    Group = "";
+                    GroupTitle = "";
                 }
             }
 
@@ -273,7 +286,7 @@ namespace iptvlistsmerger
             return list;
         }
 
-        private Dictionary<string, string> SetDict(string filepath, string splitter = "=", bool caseinsensitive = true)
+        private Dictionary<string, string> SetDict(string filepath, bool caseinsensitive = true, string splitter = "=")
         {
             var list = new Dictionary<string, string>();
             if (File.Exists(filepath))
