@@ -82,9 +82,11 @@ namespace iptvlistsmerger
 
             foreach (var listContent in listsContents)
             {
-                string GroupTitle = "";
+                string LastGroupTitle = "";
                 foreach (var item in listContent.items)
                 {
+                    string GroupTitle = "";
+
                     if (TargetListContentAdded.Contains(item.Key))
                     {
                         continue;
@@ -97,7 +99,7 @@ namespace iptvlistsmerger
                     var isgrouptitle = false;
                     if ((!(isgrouptitle = tags.Contains("group-title")) && !(EXTGRP = tags.Contains("#EXTGRP"))))
                     {
-                        tags = SetGroupTitle(tags, GroupTitle, out string groupName);
+                        tags = SetGroupTitle(tags, LastGroupTitle, out string groupName);
                         GroupTitle = groupName;
                     }
                     else
@@ -127,8 +129,11 @@ namespace iptvlistsmerger
                         if (!isgrouptitle)
                         {
                             tags = SetGroupTitle(tags, GroupTitle, out string gn, EXTGRP);
+                            GroupTitle = gn;
                         }
                     }
+
+                    LastGroupTitle = GroupTitle; // set last group title for nex records if they are ith no title
 
                     // skip group
                     if (skipgroupslist.Contains(GroupTitle))
@@ -141,10 +146,11 @@ namespace iptvlistsmerger
 
                     string WORD = null;
                     string GROUP = GroupTitle.ToUpperInvariant();
-                    bool G;
+                    string TITLE = title.ToUpperInvariant();
+                    bool G = false;
                     // rename group name
-                    if (((G = rengroupslist.ContainsKey(GROUP)) && rengroupslist[GROUP] != GroupTitle)
-                        || ((WORD = title.HasSkipwordFromDict(movebywordlist)) != null && movebywordlist[WORD] != GroupTitle))
+                    if (((WORD = TITLE.HasSkipwordFromDict(movebywordlist)) != null && movebywordlist[WORD] != GroupTitle)
+                        || ((G = rengroupslist.ContainsKey(GROUP)) && rengroupslist[GROUP] != GroupTitle))
                     {
                         // in tags
                         foreach (var r in new[] { @"group-title\=\""" + GroupTitle.Replace("+", @"\+") + @"\""", "#EXTGRP:[ ]*" + GroupTitle.Replace("+", @"\+") })
@@ -175,8 +181,10 @@ namespace iptvlistsmerger
                     TargetListContent[GroupTitle].Add(new Record(source, tags, title)); // add record to group
                     TargetListContentAdded.Add(source); // add source stream link to control duplicates
 
-                    GroupTitle = "";
+                    LastGroupTitle = "";// disabled last group
                 }
+
+                //LastGroupTitle = ""; // reset last group title after end of a playlist
             }
 
             // read list of skip words
