@@ -40,6 +40,7 @@ namespace iptvlistsmerger
             bool SourceIsDir = false;
             if (!(SourceIsDir = Directory.Exists(Source)) && !File.Exists(Source))
             {
+                lblInfo.Text = "Invalid source path";
                 return;
             }
 

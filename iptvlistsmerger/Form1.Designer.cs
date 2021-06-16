@@ -50,9 +50,10 @@ namespace iptvlistsmerger
             // 
             // btnMerge
             // 
-            this.btnMerge.Location = new System.Drawing.Point(3, 3);
+            this.btnMerge.Location = new System.Drawing.Point(4, 3);
+            this.btnMerge.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnMerge.Name = "btnMerge";
-            this.btnMerge.Size = new System.Drawing.Size(115, 29);
+            this.btnMerge.Size = new System.Drawing.Size(134, 33);
             this.btnMerge.TabIndex = 0;
             this.btnMerge.Text = "Merge";
             this.btnMerge.UseVisualStyleBackColor = true;
@@ -61,27 +62,29 @@ namespace iptvlistsmerger
             // tbSource
             // 
             this.tbSource.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tbSource.Location = new System.Drawing.Point(88, 0);
-            this.tbSource.Margin = new System.Windows.Forms.Padding(3, 0, 1, 0);
+            this.tbSource.Location = new System.Drawing.Point(103, 0);
+            this.tbSource.Margin = new System.Windows.Forms.Padding(4, 0, 1, 0);
             this.tbSource.Name = "tbSource";
-            this.tbSource.Size = new System.Drawing.Size(764, 21);
+            this.tbSource.Size = new System.Drawing.Size(891, 23);
             this.tbSource.TabIndex = 1;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(3, 0);
+            this.label1.Location = new System.Drawing.Point(4, 0);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(44, 13);
+            this.label1.Size = new System.Drawing.Size(46, 15);
             this.label1.TabIndex = 2;
             this.label1.Text = "Source:";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 24);
+            this.label2.Location = new System.Drawing.Point(4, 28);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(43, 13);
+            this.label2.Size = new System.Drawing.Size(44, 15);
             this.label2.TabIndex = 4;
             this.label2.Text = "Target:";
             // 
@@ -92,7 +95,7 @@ namespace iptvlistsmerger
             this.AllElementsPanel.Location = new System.Drawing.Point(0, 0);
             this.AllElementsPanel.Margin = new System.Windows.Forms.Padding(0);
             this.AllElementsPanel.Name = "AllElementsPanel";
-            this.AllElementsPanel.Size = new System.Drawing.Size(853, 85);
+            this.AllElementsPanel.Size = new System.Drawing.Size(995, 98);
             this.AllElementsPanel.TabIndex = 5;
             // 
             // TLPAll
@@ -108,7 +111,7 @@ namespace iptvlistsmerger
             this.TLPAll.RowCount = 2;
             this.TLPAll.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 58.24176F));
             this.TLPAll.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 41.75824F));
-            this.TLPAll.Size = new System.Drawing.Size(853, 85);
+            this.TLPAll.Size = new System.Drawing.Size(995, 98);
             this.TLPAll.TabIndex = 0;
             // 
             // tableLayoutPanel3
@@ -119,20 +122,21 @@ namespace iptvlistsmerger
             this.tableLayoutPanel3.Controls.Add(this.btnMerge, 0, 0);
             this.tableLayoutPanel3.Controls.Add(this.lblInfo, 1, 0);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(0, 49);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(0, 57);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(853, 36);
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(995, 41);
             this.tableLayoutPanel3.TabIndex = 6;
             // 
             // lblInfo
             // 
             this.lblInfo.AutoSize = true;
-            this.lblInfo.Location = new System.Drawing.Point(173, 0);
+            this.lblInfo.Location = new System.Drawing.Point(203, 0);
+            this.lblInfo.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblInfo.Name = "lblInfo";
-            this.lblInfo.Size = new System.Drawing.Size(13, 13);
+            this.lblInfo.Size = new System.Drawing.Size(12, 15);
             this.lblInfo.TabIndex = 1;
             this.lblInfo.Text = "_";
             // 
@@ -152,7 +156,7 @@ namespace iptvlistsmerger
             this.TPLSourceTargetPaths.RowCount = 2;
             this.TPLSourceTargetPaths.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.TPLSourceTargetPaths.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.TPLSourceTargetPaths.Size = new System.Drawing.Size(853, 49);
+            this.TPLSourceTargetPaths.Size = new System.Drawing.Size(995, 57);
             this.TPLSourceTargetPaths.TabIndex = 0;
             // 
             // TargetPathPanel
@@ -160,16 +164,18 @@ namespace iptvlistsmerger
             this.TargetPathPanel.Controls.Add(this.tbTarget);
             this.TargetPathPanel.Controls.Add(this.cbxTargets);
             this.TargetPathPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.TargetPathPanel.Location = new System.Drawing.Point(88, 27);
+            this.TargetPathPanel.Location = new System.Drawing.Point(103, 31);
+            this.TargetPathPanel.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.TargetPathPanel.Name = "TargetPathPanel";
-            this.TargetPathPanel.Size = new System.Drawing.Size(762, 19);
+            this.TargetPathPanel.Size = new System.Drawing.Size(888, 23);
             this.TargetPathPanel.TabIndex = 5;
             // 
             // tbTarget
             // 
             this.tbTarget.Location = new System.Drawing.Point(0, 0);
+            this.tbTarget.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tbTarget.Name = "tbTarget";
-            this.tbTarget.Size = new System.Drawing.Size(745, 21);
+            this.tbTarget.Size = new System.Drawing.Size(868, 23);
             this.tbTarget.TabIndex = 1;
             // 
             // cbxTargets
@@ -177,17 +183,19 @@ namespace iptvlistsmerger
             this.cbxTargets.Dock = System.Windows.Forms.DockStyle.Top;
             this.cbxTargets.FormattingEnabled = true;
             this.cbxTargets.Location = new System.Drawing.Point(0, 0);
+            this.cbxTargets.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cbxTargets.Name = "cbxTargets";
-            this.cbxTargets.Size = new System.Drawing.Size(762, 21);
+            this.cbxTargets.Size = new System.Drawing.Size(888, 23);
             this.cbxTargets.TabIndex = 0;
             this.cbxTargets.SelectedIndexChanged += new System.EventHandler(this.CBXTargets_SelectedIndexChanged);
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(853, 85);
+            this.ClientSize = new System.Drawing.Size(995, 98);
             this.Controls.Add(this.AllElementsPanel);
+            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
