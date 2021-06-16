@@ -180,7 +180,7 @@ namespace iptvlistsmerger
             this.cbxTargets.Name = "cbxTargets";
             this.cbxTargets.Size = new System.Drawing.Size(762, 21);
             this.cbxTargets.TabIndex = 0;
-            this.cbxTargets.SelectedIndexChanged += new System.EventHandler(this.cbxTargets_SelectedIndexChanged);
+            this.cbxTargets.SelectedIndexChanged += new System.EventHandler(this.CBXTargets_SelectedIndexChanged);
             // 
             // Form1
             // 

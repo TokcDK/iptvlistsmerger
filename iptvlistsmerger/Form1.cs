@@ -67,8 +67,8 @@ namespace iptvlistsmerger
             ParseList(list.FullName);
         }
 
-        readonly Dictionary<string, List<Record>> TargetListContent = new Dictionary<string, List<Record>>();
-        readonly HashSet<string> TargetListContentAdded = new HashSet<string>();
+        readonly Dictionary<string, List<Record>> TargetListContent = new();
+        readonly HashSet<string> TargetListContentAdded = new();
 
         private void MergeInTarget()
         {
@@ -114,8 +114,8 @@ namespace iptvlistsmerger
                             c2 = '\n';
                         }
 
-                        StringBuilder groupName = new StringBuilder();
-                        foreach (var c in tags.Substring(tags.IndexOf(tag) + tag.Length))
+                        StringBuilder groupName = new();
+                        foreach (var c in tags[(tags.IndexOf(tag) + tag.Length)..])
                         {
                             if (c == c1 || c == c2)
                             {
@@ -194,7 +194,7 @@ namespace iptvlistsmerger
             HashSet<string> skipwords = SetList("skipw.txt", true);
 
             //create target playlist content and add header m3u info
-            StringBuilder targetm3uContent = new StringBuilder();
+            StringBuilder targetm3uContent = new();
             targetm3uContent.AppendLine(TargetM3UInfo);
 
             // check if exists file add1.txt and add lines from there right adter m3u info
@@ -275,7 +275,7 @@ namespace iptvlistsmerger
             File.WriteAllText(Target, targetm3uContent.ToString());
         }
 
-        private HashSet<string> SetList(string filepath, bool toupper = false)
+        private static HashSet<string> SetList(string filepath, bool toupper = false)
         {
             var list = new HashSet<string>();
             if (File.Exists(filepath))
@@ -294,7 +294,7 @@ namespace iptvlistsmerger
             return list;
         }
 
-        private Dictionary<string, string> SetDict(string filepath, bool caseinsensitive = true, string splitter = "=")
+        private static Dictionary<string, string> SetDict(string filepath, bool caseinsensitive = true, string splitter = "=")
         {
             var list = new Dictionary<string, string>();
             if (File.Exists(filepath))
@@ -321,7 +321,7 @@ namespace iptvlistsmerger
             return list;
         }
 
-        private string SetGroupTitle(string value, string lastGroup, out string groupName, bool EXTGRP = false)
+        private static string SetGroupTitle(string value, string lastGroup, out string groupName, bool EXTGRP = false)
         {
             var parts = value.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
             var reg = Regex.Match(parts[0], @"#EXTINF(:-?[0-9]{0,12})");
@@ -336,7 +336,7 @@ namespace iptvlistsmerger
             return string.Join("\r\n", parts);
         }
 
-        readonly List<Playlist> listsContents = new List<Playlist>();
+        readonly List<Playlist> listsContents = new();
         private void ParseList(string list)
         {
             if (!Path.GetExtension(list).ToUpperInvariant().StartsWith(".M3U"))
@@ -365,7 +365,7 @@ namespace iptvlistsmerger
             cbxTargets.Items.AddRange(Properties.Settings.Default.TargetsList.ToArray());
         }
 
-        private void cbxTargets_SelectedIndexChanged(object sender, EventArgs e)
+        private void CBXTargets_SelectedIndexChanged(object sender, EventArgs e)
         {
             tbTarget.Text = cbxTargets.Text;
         }
@@ -378,66 +378,64 @@ namespace iptvlistsmerger
 
         public void Read(string list)
         {
-            using (StreamReader sr = new StreamReader(list))
+            using StreamReader sr = new(list);
+            string line;
+            var GotExm3u = false;
+            bool IstrackInfo = false;
+            StringBuilder rlines = new();
+            while ((line = sr.ReadLine()) != null)
             {
-                string line;
-                var GotExm3u = false;
-                bool IstrackInfo = false;
-                StringBuilder rlines = new StringBuilder();
-                while ((line = sr.ReadLine()) != null)
+                if (string.IsNullOrWhiteSpace(line))
                 {
-                    if (string.IsNullOrWhiteSpace(line))
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    if (IstrackInfo && (line.StartsWith("udp") || line.StartsWith("http")))
-                    {
-                        if (!items.ContainsKey(line))
-                            items.Add(line, rlines.ToString());
+                if (IstrackInfo && (line.StartsWith("udp") || line.StartsWith("http")))
+                {
+                    if (!items.ContainsKey(line))
+                        items.Add(line, rlines.ToString());
 
-                        IstrackInfo = false;
-                    }
-                    else if (line.StartsWith("#EXT"))
+                    IstrackInfo = false;
+                }
+                else if (line.StartsWith("#EXT"))
+                {
+                    if (!GotExm3u && line.StartsWith("#EXTM3U"))
                     {
-                        if (!GotExm3u && line.StartsWith("#EXTM3U"))
+                        GotExm3u = true;
+
+                        var endname = line.TrimEnd().IndexOf(' ');
+                        if (endname == -1) // skip when no m3u info
                         {
-                            GotExm3u = true;
+                            continue;
+                        }
+                        var name = line[1..endname];
+                        var value = line[(endname + 1)..].Split(',');
+                        var title = value.Length == 2 ? value[2] : "";
+                        var attributes = value[0];
 
-                            var endname = line.TrimEnd().IndexOf(' ');
-                            if (endname == -1) // skip when no m3u info
+                        Extm3uInfo = new List<string>();
+
+                        foreach (var attrib in attributes.Split(' ', (char)StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            if (string.IsNullOrWhiteSpace(attrib))
                             {
                                 continue;
                             }
-                            var name = line.Substring(1, endname - 1);
-                            var value = line.Substring(endname + 1).Split(',');
-                            var title = value.Length == 2 ? value[2] : "";
-                            var attributes = value[0];
-
-                            Extm3uInfo = new List<string>();
-
-                            foreach (var attrib in attributes.Split(' ', (char)StringSplitOptions.RemoveEmptyEntries))
-                            {
-                                if (string.IsNullOrWhiteSpace(attrib))
-                                {
-                                    continue;
-                                }
-                                Extm3uInfo.Add(attrib);
-                            }
-                        }
-                        else if (line.StartsWith("#EXTINF"))
-                        {
-                            IstrackInfo = true;
-                            rlines.Clear();
-                            rlines.Append(line);
-                        }
-                        else if (IstrackInfo)
-                        {
-                            rlines.Append("\r\n" + line);
+                            Extm3uInfo.Add(attrib);
                         }
                     }
-
+                    else if (line.StartsWith("#EXTINF"))
+                    {
+                        IstrackInfo = true;
+                        rlines.Clear();
+                        rlines.Append(line);
+                    }
+                    else if (IstrackInfo)
+                    {
+                        rlines.Append("\r\n" + line);
+                    }
                 }
+
             }
         }
 
