@@ -77,6 +77,9 @@ namespace iptvlistsmerger
             // check if exists file skipg.txt and add list of groups from there
             var skipgroupslist = SetList("skipg.txt", true);
 
+            // blacklist to skip urls
+            var skipurl = SetList("skipu.txt", true);
+
             // rename groups list.
             var rengroupslist = SetDict("reng.txt", true);
             var movebywordlist = SetDict("rengbyw.txt", true);
@@ -88,7 +91,8 @@ namespace iptvlistsmerger
                 {
                     string GroupTitle = "";
 
-                    if (TargetListContentAdded.Contains(item.Key))
+                    // skip url from skipu and skip already added
+                    if (TargetListContentAdded.Contains(item.Key) || skipurl.Contains(item.Key.ToUpperInvariant()))
                     {
                         continue;
                     }
