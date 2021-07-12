@@ -81,7 +81,6 @@ namespace iptvlistsmerger
                 Properties.Settings.Default.TargetsList.Add(record);
                 combobox.Items.Clear();
                 combobox.Items.AddRange(Properties.Settings.Default.TargetsList.ToArray());
-                Properties.Settings.Default.Save();
             }
         }
     }

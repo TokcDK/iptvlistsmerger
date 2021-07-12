@@ -44,7 +44,9 @@ namespace iptvlistsmerger
                 return;
             }
 
+            Properties.Settings.Default.LastTarget = rawTargetPath;
             cbxTargets.UpdateTargets(rawTargetPath);
+            Properties.Settings.Default.Save();
 
             if (SourceIsDir)
             {
@@ -374,7 +376,7 @@ namespace iptvlistsmerger
             {
                 Properties.Settings.Default.TargetsList = new System.Collections.Specialized.StringCollection();
             }
-
+            Target = Properties.Settings.Default.LastTarget;
             tbSource.Text = Source;
             tbTarget.Text = Target;
             cbxTargets.Items.AddRange(Properties.Settings.Default.TargetsList.ToArray());

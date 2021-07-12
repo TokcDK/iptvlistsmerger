@@ -5,5 +5,8 @@
     <Setting Name="TargetsList" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="LastTarget" Type="System.String" Scope="User">
+      <Value Profile="(Default)">.\Target.m3u</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

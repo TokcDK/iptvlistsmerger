@@ -33,5 +33,17 @@ namespace iptvlistsmerger.Properties {
                 this["TargetsList"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(".\\Target.m3u")]
+        public string LastTarget {
+            get {
+                return ((string)(this["LastTarget"]));
+            }
+            set {
+                this["LastTarget"] = value;
+            }
+        }
     }
 }
