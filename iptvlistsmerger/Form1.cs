@@ -78,7 +78,7 @@ namespace iptvlistsmerger
             var skipgroupslist = SetList("skipg.txt", true);
 
             // blacklist to skip urls
-            var skipurl = SetList("skipu.txt", true);
+            var skipurl = SetList("skipu.txt", true, cutUrlOptions: true);
 
             // rename groups list.
             var rengroupslist = SetDict("reng.txt", true);
@@ -92,7 +92,7 @@ namespace iptvlistsmerger
                     string GroupTitle = "";
 
                     // skip url from skipu and skip already added
-                    if (TargetListContentAdded.Contains(item.Key) || skipurl.Contains(item.Key.ToUpperInvariant()))
+                    if (TargetListContentAdded.Contains(item.Key) || skipurl.Contains(item.Key.Split('?')[0].ToUpperInvariant()))
                     {
                         continue;
                     }
@@ -280,7 +280,7 @@ namespace iptvlistsmerger
             File.WriteAllText(Target, targetm3uContent.ToString());
         }
 
-        private static HashSet<string> SetList(string filepath, bool toupper = false)
+        private static HashSet<string> SetList(string filepath, bool toupper = false, bool cutUrlOptions = false)
         {
             var list = new HashSet<string>();
             if (File.Exists(filepath))
@@ -292,7 +292,17 @@ namespace iptvlistsmerger
                         continue; // skip empty and commented lines
                     }
 
-                    list.Add(toupper ? line.ToUpperInvariant() : line);
+                    string lineToAdd = line;
+                    if (cutUrlOptions && line.Length > 2 && line.Contains("?") && (line.ToUpperInvariant().StartsWith("HTTP") || line.ToUpperInvariant().StartsWith("UDP")))
+                    {
+                        lineToAdd = line.Split('?')[0];
+                    }
+                    lineToAdd = (toupper ? lineToAdd.ToUpperInvariant() : lineToAdd);
+
+                    if (!list.Contains(lineToAdd))
+                    {
+                        list.Add(lineToAdd);
+                    }
                 }
             }
 
