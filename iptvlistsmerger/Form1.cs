@@ -147,17 +147,11 @@ namespace iptvlistsmerger
                         foreach (var r in new[] { @"group-title\=\""" + GroupTitle.Replace("+", @"\+") + @"\""", "#EXTGRP:[ ]*" + GroupTitle.Replace("+", @"\+") })
                         {
                             Match m = Regex.Match(tags, r, RegexOptions.IgnoreCase);
-                            if (m.Success)
-                            {
-                                if (G)
-                                {
-                                    tags = tags.Replace(m.Value, m.Value.Replace(GroupTitle, rengroupslist[GROUP]));
-                                }
-                                else
-                                {
-                                    tags = tags.Replace(m.Value, m.Value.Replace(GroupTitle, movebywordlist[WORD]));
-                                }
-                            }
+                            if (!m.Success) continue;
+
+                            tags = G
+                                ? tags.Replace(m.Value, m.Value.Replace(GroupTitle, rengroupslist[GROUP]))
+                                : tags.Replace(m.Value, m.Value.Replace(GroupTitle, movebywordlist[WORD]));
                         }
 
                         // group name itself
@@ -179,10 +173,10 @@ namespace iptvlistsmerger
             }
 
             // read list of skip words
-            HashSet<string> dontskipwords = SetList("!skipw.txt", true);
+            var dontskipwords = SetList("!skipw.txt", true);
 
             // read list of skip words
-            HashSet<string> skipwords = SetList("skipw.txt", true);
+            var skipwords = SetList("skipw.txt", true);
 
             //create target playlist content and add header m3u info
             StringBuilder targetm3uContent = new();
@@ -193,7 +187,7 @@ namespace iptvlistsmerger
 
             // first add groups by selected list
             // check if exists file firstg.txt and add list of groups from there
-            HashSet<string> firstgroups = SetList("firstg.txt");
+            var firstgroups = SetList("firstg.txt");
             foreach (var group in firstgroups)
             {
                 if (!TargetListContent.ContainsKey(group)) continue;
@@ -214,7 +208,7 @@ namespace iptvlistsmerger
             Array.Sort(groupslist);
 
             // last add groups by selected list
-            HashSet<string> lastgroups = SetList("lastg.txt");
+            var lastgroups = SetList("lastg.txt");
 
             //add groups and records by sorted list
             foreach (var group in groupslist)
