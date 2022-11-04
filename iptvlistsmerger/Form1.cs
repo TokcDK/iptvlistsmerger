@@ -23,14 +23,8 @@ namespace iptvlistsmerger
         {
             lblInfo.Text = "";
 
-            if (!string.IsNullOrWhiteSpace(tbSource.Text) && tbSource.Text != Source)
-            {
-                Source = tbSource.Text;
-            }
-            if (!string.IsNullOrWhiteSpace(tbTarget.Text) && tbTarget.Text != Target)
-            {
-                Target = tbTarget.Text;
-            }
+            if (!string.IsNullOrWhiteSpace(tbSource.Text) && tbSource.Text != Source) Source = tbSource.Text;
+            if (!string.IsNullOrWhiteSpace(tbTarget.Text) && tbTarget.Text != Target) Target = tbTarget.Text;
 
             var rawTargetPath = Target;
 
@@ -50,10 +44,8 @@ namespace iptvlistsmerger
 
             if (SourceIsDir)
             {
-                foreach (var list in new DirectoryInfo(Source).GetFiles("*.m3u?", SearchOption.AllDirectories).OrderByDescending(f => f.LastWriteTime.Year <= 1601 ? f.CreationTime : f.LastWriteTime)/*https://stackoverflow.com/a/23839158*/)
-                {
-                    ParseList(list);
-                }
+                var lists = new DirectoryInfo(Source).EnumerateFiles("*.m3u?", SearchOption.AllDirectories).OrderByDescending(f => f.LastWriteTime.Year <= 1601 ? f.CreationTime : f.LastWriteTime)/*https://stackoverflow.com/a/23839158*/;
+                foreach (var list in lists) ParseList(list);
             }
             else
             {
@@ -94,10 +86,8 @@ namespace iptvlistsmerger
                     string GroupTitle = "";
 
                     // skip url from skipu and skip already added
-                    if (TargetListContentAdded.Contains(item.Key) || skipurl.Contains(item.Key.Split('?')[0].ToUpperInvariant()))
-                    {
-                        continue;
-                    }
+                    if (TargetListContentAdded.Contains(item.Key)) continue;
+                    if (skipurl.Contains(item.Key.Split('?')[0].ToUpperInvariant())) continue;
 
                     var tags = item.Value;
                     var source = item.Key;
@@ -124,10 +114,7 @@ namespace iptvlistsmerger
                         StringBuilder groupName = new();
                         foreach (var c in tags[(tags.IndexOf(tag) + tag.Length)..])
                         {
-                            if (c == c1 || c == c2)
-                            {
-                                break;
-                            }
+                            if (c == c1 || c == c2) break;
 
                             groupName.Append(c);
                         }
@@ -143,10 +130,7 @@ namespace iptvlistsmerger
                     LastGroupTitle = GroupTitle; // set last group title for nex records if they are ith no title
 
                     // skip group
-                    if (skipgroupslist.Contains(GroupTitle))
-                    {
-                        continue; // In this case same adress will not be ignored in other group
-                    }
+                    if (skipgroupslist.Contains(GroupTitle)) continue; // In this case same adress will not be ignored in other group
 
                     // record's title
                     string title = Regex.Match(tags, @"#EXTINF[^,]+,([^\r\n]+).*").Result("$1");
@@ -205,38 +189,28 @@ namespace iptvlistsmerger
             targetm3uContent.AppendLine(TargetM3UInfo);
 
             // check if exists file add1.txt and add lines from there right adter m3u info
-            foreach (var line in SetList("add1.txt"))
-            {
-                targetm3uContent.AppendLine(line);
-            }
+            foreach (var line in SetList("add1.txt")) targetm3uContent.AppendLine(line);
 
             // first add groups by selected list
             // check if exists file firstg.txt and add list of groups from there
             HashSet<string> firstgroups = SetList("firstg.txt");
             foreach (var group in firstgroups)
             {
-                if (TargetListContent.ContainsKey(group))
-                {
-                    foreach (var record in TargetListContent[group].OrderBy(r => r.title))
-                    {
-                        if (record.value.ToUpperInvariant().HasSkipwordFrom(skipwords, dontskipwords))
-                        {
-                            continue;
-                        }
+                if (!TargetListContent.ContainsKey(group)) continue;
 
-                        targetm3uContent.AppendLine(record.value + "\r\n" + record.address);
-                    }
+                foreach (var record in TargetListContent[group].OrderBy(r => r.title))
+                {
+                    if (record.value.ToUpperInvariant().HasSkipwordFrom(skipwords, dontskipwords)) continue;
+
+                    targetm3uContent.AppendLine(record.value + "\r\n" + record.address);
                 }
             }
 
             //create sorted groups list
             string[] groupslist = new string[TargetListContent.Count];
             int i = 0;
-            foreach (var group in TargetListContent.Keys)
-            {
-                groupslist[i] = group;
-                i++;
-            }
+            foreach (var group in TargetListContent.Keys) groupslist[i++] = group;
+
             Array.Sort(groupslist);
 
             // last add groups by selected list
@@ -245,17 +219,13 @@ namespace iptvlistsmerger
             //add groups and records by sorted list
             foreach (var group in groupslist)
             {
-                if (firstgroups.Contains(group)/*first groups was already added*/ || lastgroups.Contains(group)/*last groups will be added in the end*/ || skipgroupslist.Contains(group.ToUpperInvariant())/*skip excluded groups*/)
-                {
-                    continue;
-                }
+                if (firstgroups.Contains(group)) continue; // first groups was already added
+                if (lastgroups.Contains(group)) continue; // last groups will be added in the end
+                if (skipgroupslist.Contains(group.ToUpperInvariant())) continue; // skip excluded groups
 
                 foreach (var record in TargetListContent[group].OrderBy(r => r.title))
                 {
-                    if (record.value.ToUpperInvariant().HasSkipwordFrom(skipwords, dontskipwords))
-                    {
-                        continue;
-                    }
+                    if (record.value.ToUpperInvariant().HasSkipwordFrom(skipwords, dontskipwords)) continue;
 
                     targetm3uContent.AppendLine(record.value + "\r\n" + record.address);
                 }
@@ -264,17 +234,13 @@ namespace iptvlistsmerger
             // check if exists file lastg.txt and add list of groups from there
             foreach (var group in lastgroups)
             {
-                if (TargetListContent.ContainsKey(group))
-                {
-                    foreach (var record in TargetListContent[group].OrderBy(r => r.title))
-                    {
-                        if (record.value.ToUpperInvariant().HasSkipwordFrom(skipwords, dontskipwords))
-                        {
-                            continue;
-                        }
+                if (!TargetListContent.ContainsKey(group)) continue;
 
-                        targetm3uContent.AppendLine(record.value + "\r\n" + record.address);
-                    }
+                foreach (var record in TargetListContent[group].OrderBy(r => r.title))
+                {
+                    if (record.value.ToUpperInvariant().HasSkipwordFrom(skipwords, dontskipwords)) continue;
+
+                    targetm3uContent.AppendLine(record.value + "\r\n" + record.address);
                 }
             }
 
@@ -285,27 +251,20 @@ namespace iptvlistsmerger
         private static HashSet<string> SetList(string filepath, bool toupper = false, bool cutUrlOptions = false)
         {
             var list = new HashSet<string>();
-            if (File.Exists(filepath))
+            if (!File.Exists(filepath)) return list;
+
+            foreach (var line in File.ReadAllLines(filepath))
             {
-                foreach (var line in File.ReadAllLines(filepath))
+                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("//")) continue; // skip empty and commented lines
+
+                string lineToAdd = line;
+                if (cutUrlOptions && line.Length > 2 && line.Contains("?") && (line.ToUpperInvariant().StartsWith("HTTP") || line.ToUpperInvariant().StartsWith("UDP")))
                 {
-                    if (string.IsNullOrWhiteSpace(line) || line.StartsWith("//"))
-                    {
-                        continue; // skip empty and commented lines
-                    }
-
-                    string lineToAdd = line;
-                    if (cutUrlOptions && line.Length > 2 && line.Contains("?") && (line.ToUpperInvariant().StartsWith("HTTP") || line.ToUpperInvariant().StartsWith("UDP")))
-                    {
-                        lineToAdd = line.Split('?')[0];
-                    }
-                    lineToAdd = (toupper ? lineToAdd.ToUpperInvariant() : lineToAdd);
-
-                    if (!list.Contains(lineToAdd))
-                    {
-                        list.Add(lineToAdd);
-                    }
+                    lineToAdd = line.Split('?')[0];
                 }
+                lineToAdd = (toupper ? lineToAdd.ToUpperInvariant() : lineToAdd);
+
+                if (!list.Contains(lineToAdd)) list.Add(lineToAdd);
             }
 
             return list;
@@ -314,25 +273,18 @@ namespace iptvlistsmerger
         private static Dictionary<string, string> SetDict(string filepath, bool caseinsensitive = true, string splitter = "=")
         {
             var list = new Dictionary<string, string>();
-            if (File.Exists(filepath))
+            if (!File.Exists(filepath)) return list;
+
+            foreach (var line in File.ReadAllLines(filepath))
             {
-                foreach (var line in File.ReadAllLines(filepath))
-                {
-                    if (string.IsNullOrWhiteSpace(line) || line.StartsWith("//"))
-                    {
-                        continue; // skip empty and commented lines
-                    }
+                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("//")) continue; // skip empty and commented lines
 
-                    string[] splitted = line.Split(new[] { splitter }, StringSplitOptions.RemoveEmptyEntries);
-                    if (splitted.Length != 2)
-                    {
-                        continue;
-                    }
+                string[] splitted = line.Split(new[] { splitter }, StringSplitOptions.RemoveEmptyEntries);
+                if (splitted.Length != 2) continue;
 
-                    string key = caseinsensitive ? splitted[0].ToUpperInvariant() : splitted[0];
-                    if (!list.ContainsKey(key))
-                        list.Add(key, splitted[1]);
-                }
+                string key = caseinsensitive ? splitted[0].ToUpperInvariant() : splitted[0];
+                if (!list.ContainsKey(key)) list.Add(key, splitted[1]);
+
             }
 
             return list;
@@ -343,10 +295,8 @@ namespace iptvlistsmerger
             var parts = value.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
             var reg = Regex.Match(parts[0], @"#EXTINF(:-?[0-9]{0,12})");
             Match groupm = null;
-            if (!EXTGRP)
-            {
-                groupm = Regex.Match(parts[0], @"group\=\""([^\""]+)\""");
-            }
+            if (!EXTGRP) groupm = Regex.Match(parts[0], @"group\=\""([^\""]+)\""");
+
             groupName = (EXTGRP ? lastGroup : groupm != null && groupm.Success ? groupm.Result("$1") : lastGroup.Length > 0 ? lastGroup : "Разное");
             parts[0] = parts[0].Insert(parts[0].IndexOf(reg.Result("$1")) + reg.Result("$1").Length, " group-title=\"" + groupName + "\"");
 
@@ -356,26 +306,18 @@ namespace iptvlistsmerger
         readonly List<Playlist> listsContents = new();
         private void ParseList(string list)
         {
-            if (!Path.GetExtension(list).ToUpperInvariant().StartsWith(".M3U"))
-            {
-                return;
-            }
+            if (!Path.GetExtension(list).ToUpperInvariant().StartsWith(".M3U")) return;
 
             var pl = new Playlist();
             pl.Read(list);
 
-            if (pl?.items.Count > 0)
-            {
-                listsContents.Add(pl);
-            }
+            if (pl?.items.Count > 0) listsContents.Add(pl);
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            if (Properties.Settings.Default.TargetsList == null)
-            {
-                Properties.Settings.Default.TargetsList = new System.Collections.Specialized.StringCollection();
-            }
+            if (Properties.Settings.Default.TargetsList == null) Properties.Settings.Default.TargetsList = new System.Collections.Specialized.StringCollection();
+
             Target = Properties.Settings.Default.LastTarget;
             tbSource.Text = Source;
             tbTarget.Text = Target;
@@ -390,8 +332,8 @@ namespace iptvlistsmerger
 
     public class Playlist
     {
-        public List<string> Extm3uInfo;
-        public Dictionary<string, string> items;
+        public List<string> Extm3uInfo = new List<string>();
+        public Dictionary<string, string> items = new Dictionary<string, string>();
 
         public void Read(string list)
         {
@@ -402,10 +344,7 @@ namespace iptvlistsmerger
             StringBuilder rlines = new();
             while ((line = sr.ReadLine()) != null)
             {
-                if (string.IsNullOrWhiteSpace(line))
-                {
-                    continue;
-                }
+                if (string.IsNullOrWhiteSpace(line)) continue;
 
                 if (IstrackInfo && (line.StartsWith("udp") || line.StartsWith("http")))
                 {
@@ -421,10 +360,8 @@ namespace iptvlistsmerger
                         GotExm3u = true;
 
                         var endname = line.TrimEnd().IndexOf(' ');
-                        if (endname == -1) // skip when no m3u info
-                        {
-                            continue;
-                        }
+                        if (endname == -1) continue; // skip when no m3u info
+
                         var name = line[1..endname];
                         var value = line[(endname + 1)..].Split(',');
                         var title = value.Length == 2 ? value[2] : "";
@@ -434,10 +371,8 @@ namespace iptvlistsmerger
 
                         foreach (var attrib in attributes.Split(' ', (char)StringSplitOptions.RemoveEmptyEntries))
                         {
-                            if (string.IsNullOrWhiteSpace(attrib))
-                            {
-                                continue;
-                            }
+                            if (string.IsNullOrWhiteSpace(attrib)) continue;
+
                             Extm3uInfo.Add(attrib);
                         }
                     }
@@ -454,12 +389,6 @@ namespace iptvlistsmerger
                 }
 
             }
-        }
-
-        public Playlist()
-        {
-            Extm3uInfo = new List<string>();
-            items = new Dictionary<string, string>();
         }
     }
     public class Record
