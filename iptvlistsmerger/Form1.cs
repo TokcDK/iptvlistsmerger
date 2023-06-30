@@ -22,13 +22,13 @@ namespace iptvlistsmerger
         private void BtnMerge_Click(object sender, EventArgs e)
         {
             lblInfo.Text = "";
-            if (string.IsNullOrWhiteSpace(tbSource.Text) && tbSource.Text != Source) 
+            if (string.IsNullOrWhiteSpace(tbSource.Text) && tbSource.Text != Source)
             {
                 lblInfo.Text = "Source path is empty";
                 return;
             }
             Source = tbSource.Text;
-            if (string.IsNullOrWhiteSpace(tbTarget.Text) && tbTarget.Text != Target) 
+            if (string.IsNullOrWhiteSpace(tbTarget.Text) && tbTarget.Text != Target)
             {
                 lblInfo.Text = "Target path is empty";
                 return;
