@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,7 +22,18 @@ namespace iptvlistsmerger
         private void BtnMerge_Click(object sender, EventArgs e)
         {
             lblInfo.Text = "";
-
+            if (string.IsNullOrWhiteSpace(tbSource.Text) && tbSource.Text != Source) 
+            {
+                lblInfo.Text = "Source path is empty";
+                return;
+            }
+            Source = tbSource.Text;
+            if (string.IsNullOrWhiteSpace(tbTarget.Text) && tbTarget.Text != Target) 
+            {
+                lblInfo.Text = "Target path is empty";
+                return;
+            }
+            Target = tbTarget.Text;
             if (!string.IsNullOrWhiteSpace(tbSource.Text) && tbSource.Text != Source) Source = tbSource.Text;
             if (!string.IsNullOrWhiteSpace(tbTarget.Text) && tbTarget.Text != Target) Target = tbTarget.Text;
 
@@ -37,8 +48,24 @@ namespace iptvlistsmerger
                 lblInfo.Text = "Invalid source path";
                 return;
             }
+            try
+            {
+                if (SourceIsDir)
+                {
+                    var lists = new DirectoryInfo(Source).EnumerateFiles("*.m3u?", SearchOption.AllDirectories).OrderByDescending(f => f.LastWriteTime.Year <= 1601 ? f.CreationTime : f.LastWriteTime)/*https://stackoverflow.com/a/23839158*/;
+                    foreach (var list in lists) ParseList(list);
+                }
+                else
+                {
+                    ParseList(Source);
+                }
 
-            Properties.Settings.Default.LastTarget = rawTargetPath;
+                MergeInTarget();
+            }
+            catch (Exception ex)
+            {
+                lblInfo.Text = "An error occurred: " + ex.Message;
+            }
             cbxTargets.UpdateTargets(rawTargetPath);
             Properties.Settings.Default.Save();
 
@@ -53,12 +80,15 @@ namespace iptvlistsmerger
             }
 
             MergeInTarget();
-
-            lblInfo.Text = "Finished!" + DateTime.Now;
         }
 
+        // Parses the given list
         private void ParseList(FileInfo list)
         {
+            if (list == null)
+            {
+                throw new ArgumentNullException(nameof(list));
+            }
             ParseList(list.FullName);
         }
 
@@ -283,13 +313,22 @@ namespace iptvlistsmerger
 
             return list;
         }
-
+        // Sets the group title
         private static string SetGroupTitle(string value, string lastGroup, out string groupName, bool EXTGRP = false)
         {
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+            if (string.IsNullOrEmpty(lastGroup))
+            {
+                throw new ArgumentNullException(nameof(lastGroup));
+            }
+
             var parts = value.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
             var reg = Regex.Match(parts[0], @"#EXTINF(:-?[0-9]{0,12})");
             Match groupm = null;
-            if (!EXTGRP) groupm = Regex.Match(parts[0], @"group\=\""([^\""]+)\""");
+            if (!EXTGRP) groupm = Regex.Match(parts[0], @"group\=\""([^\""]+)\''');
 
             groupName = (EXTGRP ? lastGroup : groupm != null && groupm.Success ? groupm.Result("$1") : lastGroup.Length > 0 ? lastGroup : "Разное");
             parts[0] = parts[0].Insert(parts[0].IndexOf(reg.Result("$1")) + reg.Result("$1").Length, " group-title=\"" + groupName + "\"");
@@ -399,3 +438,4 @@ namespace iptvlistsmerger
         }
     }
 }
+
